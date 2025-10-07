@@ -20,9 +20,11 @@ app = FastAPI(
     openapi_tags=OPENAPI_TAGS,
 )
 
-# CORS configuration: default localhost:3000 plus any provided in env
+# CORS configuration: include frontend origin(s)
 allow_origins = set(settings.cors_origins or [])
+# Always ensure localhost frontend is allowed for development
 allow_origins.add("http://localhost:3000")
+# optional https localhost for some setups
 allow_origins.add("https://localhost:3000")
 app.add_middleware(
     CORSMiddleware,

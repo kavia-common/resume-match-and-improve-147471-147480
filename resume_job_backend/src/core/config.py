@@ -16,17 +16,20 @@ class Settings(BaseModel):
     postgres_port: Optional[str] = None
     # Allow specifying host when building DSN from parts (defaults to localhost if not provided)
     postgres_host: Optional[str] = None
+    # List of allowed origins for CORS
     cors_origins: List[str] = []
+    # Supabase configuration
     supabase_url: Optional[str] = None
     supabase_jwt_secret: Optional[str] = None
     supabase_service_role_key: Optional[str] = None
+    # Storage bucket for resumes (Supabase)
     file_storage_bucket: Optional[str] = None
     # Defaults to 3001 per requirements
     backend_port: int = 3001
 
+    # PUBLIC_INTERFACE
     def get_db_dsn(self) -> Optional[str]:
         """
-        PUBLIC_INTERFACE
         Return a postgres DSN URL. Prefer POSTGRES_URL; else build from parts if all provided.
         When building from parts, uses POSTGRES_HOST if provided, else 'localhost'.
         """
@@ -49,6 +52,8 @@ def _parse_cors_origins(val: Optional[str]) -> List[str]:
     return [o.strip() for o in val.split(",") if o.strip()]
 
 
+# Build settings from environment variables.
+# Note: Use CORS_ALLOWED_ORIGINS (CSV) per requirements.
 settings = Settings(
     postgres_url=os.getenv("POSTGRES_URL"),
     postgres_user=os.getenv("POSTGRES_USER"),
@@ -56,11 +61,11 @@ settings = Settings(
     postgres_db=os.getenv("POSTGRES_DB"),
     postgres_port=os.getenv("POSTGRES_PORT"),
     postgres_host=os.getenv("POSTGRES_HOST"),
-    cors_origins=_parse_cors_origins(os.getenv("CORS_ORIGINS")),
+    cors_origins=_parse_cors_origins(os.getenv("CORS_ALLOWED_ORIGINS")),
     supabase_url=os.getenv("SUPABASE_URL"),
     supabase_jwt_secret=os.getenv("SUPABASE_JWT_SECRET"),
     supabase_service_role_key=os.getenv("SUPABASE_SERVICE_ROLE_KEY"),
-    file_storage_bucket=os.getenv("FILE_STORAGE"),
+    file_storage_bucket=os.getenv("SUPABASE_BUCKET_RESUMES") or os.getenv("FILE_STORAGE"),
     # Default to 3001 when not specified
     backend_port=int(os.getenv("BACKEND_PORT", "3001")),
 )
